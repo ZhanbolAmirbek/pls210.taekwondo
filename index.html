@@ -6,7 +6,7 @@
 <title>Taekwondo and Belonging at Nazarbayev University</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Sans+KR:wght@900&display=swap" rel="stylesheet">
 <style>
   :root {
     --dobok: #F7F8FA;
@@ -23,10 +23,12 @@
     --belt-black: #1C2230;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  html, body { height: 100%; }
   body {
     margin: 0;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
     background: var(--dobok);
     color: var(--ink);
     font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -34,204 +36,424 @@
     line-height: 1.7;
   }
 
-  /* Belt navigation: one swatch per section, in rank order */
+  /* ---------- Belt navigation ---------- */
   nav {
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(247, 248, 250, 0.94);
-    backdrop-filter: blur(6px);
+    flex: none; z-index: 10;
+    background: var(--dobok);
     border-bottom: 1px solid var(--rule);
   }
   nav ol {
-    list-style: none; margin: 0 auto; padding: 0.75rem 1.25rem;
-    max-width: 62rem; display: flex; gap: 0.5rem; overflow-x: auto;
+    list-style: none; margin: 0 auto; padding: 0.6rem 1.25rem;
+    max-width: 68rem; display: flex; gap: 0.4rem; overflow-x: auto;
   }
   nav a {
     display: flex; align-items: center; gap: 0.5rem;
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
     font-size: 0.9rem; font-weight: 500; white-space: nowrap;
     color: var(--ink); text-decoration: none;
-    padding: 0.35rem 0.7rem; border-radius: 999px;
+    padding: 0.35rem 0.75rem; border-radius: 999px;
+    transition: background 0.25s, color 0.25s;
   }
   nav a:hover { background: #ECEEF2; }
-  nav a:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  nav a.active { background: var(--ink); color: #fff; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
   .swatch { width: 1.4rem; height: 0.5rem; border-radius: 2px; flex: none; }
   .swatch.white { background: var(--belt-white); box-shadow: inset 0 0 0 1px #BFC4CC; }
+  nav a.active .swatch.black { box-shadow: inset 0 0 0 1px #fff; }
 
-  /* Hero */
-  header {
-    max-width: 62rem; margin: 0 auto;
-    padding: 4.5rem 1.25rem 3.5rem;
+  /* ---------- The deck: slides sit side by side and the track slides left ---------- */
+  .deck { position: relative; flex: 1; overflow: hidden; }
+  .track {
+    display: flex; height: 100%;
+    transition: transform 0.7s cubic-bezier(.65,0,.25,1);
+    will-change: transform;
+  }
+  .slide {
+    flex: 0 0 100%; height: 100%;
+    overflow-y: auto; overscroll-behavior: contain;
+    display: flex;
+  }
+  .slide-inner {
+    margin: auto; width: 100%; max-width: 68rem;
+    padding: 3rem 1.25rem 6rem;
+  }
+
+  /* ---------- Title slide ---------- */
+  .slide.hero { position: relative; overflow: hidden; }
+  .watermark {
+    position: absolute; right: -2vw; bottom: -6vw;
+    font-family: "Noto Sans KR", sans-serif; font-weight: 900;
+    font-size: clamp(8rem, 26vw, 22rem); line-height: 1;
+    color: var(--ink); opacity: 0.045;
+    pointer-events: none; user-select: none; white-space: nowrap;
+  }
+  .hero .slide-inner {
+    position: relative;
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 3rem; align-items: center;
+  }
+  .hangul {
+    font-family: "Noto Sans KR", sans-serif; font-weight: 900;
+    font-size: 1.1rem; letter-spacing: 0.3em; color: var(--red); margin: 0 0 1rem;
   }
   h1 {
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
-    font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.4rem);
+    font-weight: 800; font-size: clamp(2.4rem, 5.6vw, 4.4rem);
     line-height: 1.02; letter-spacing: -0.02em;
-    margin: 0 0 2.5rem; max-width: 14ch;
+    margin: 0 0 2rem; max-width: 14ch;
   }
-  .belt-knot {
-    display: flex; height: 0.9rem; max-width: 30rem; margin-bottom: 2.5rem;
-    border-radius: 2px; overflow: hidden;
-  }
-  .belt-knot span { flex: 1; }
-  .rq {
-    border-left: 6px solid var(--red);
-    padding: 0.25rem 0 0.25rem 1.5rem;
-    max-width: 42rem;
-  }
+  .belt-bar { display: flex; gap: 3px; height: 0.9rem; max-width: 30rem; margin-bottom: 2.25rem; }
+  .belt-bar span { flex: 1; border-radius: 2px; transform-origin: left; }
+  .belt-bar span:first-child { box-shadow: inset 0 0 0 1px #BFC4CC; }
+  .rq { border-left: 6px solid var(--red); padding: 0.25rem 0 0.25rem 1.5rem; max-width: 38rem; }
   .rq p:first-child {
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
     font-size: 1rem; font-weight: 500; color: var(--muted); margin: 0 0 0.4rem;
   }
-  .rq p:last-child {
-    font-size: clamp(1.35rem, 2.6vw, 1.75rem); line-height: 1.4;
-    font-style: italic; margin: 0;
-  }
+  .rq p:last-child { font-size: clamp(1.25rem, 2.3vw, 1.6rem); line-height: 1.4; font-style: italic; margin: 0; }
+  .emblem { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+  .emblem svg { width: 100%; height: auto; }
+  .taegeuk { max-width: 17rem; }
+  .knot { max-width: 15rem; }
 
-  /* Sections: a belt stripe on the left marks each stage */
-  main { max-width: 62rem; margin: 0 auto; padding: 0 1.25rem 4rem; }
-  section {
+  /* ---------- Content slides ---------- */
+  .content-slide .slide-inner {
     display: grid; grid-template-columns: 0.6rem 1fr; gap: 0 2rem;
-    padding: 3rem 0; border-top: 1px solid var(--rule);
   }
-  section > .stripe { border-radius: 2px; }
-  section > div { max-width: 40rem; }
+  .stripe { border-radius: 2px; transform-origin: top; }
+  .content { max-width: 42rem; }
   h2 {
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
-    font-weight: 700; font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 700; font-size: clamp(1.6rem, 3vw, 2.2rem);
     line-height: 1.15; margin: 0 0 1.25rem;
   }
   h3 {
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
-    font-weight: 700; font-size: 1.15rem; margin: 1.75rem 0 0.4rem;
+    font-weight: 700; font-size: 1.15rem; margin: 1.5rem 0 0.4rem;
   }
   p { margin: 0 0 1rem; }
-
   .references p {
     font-size: 1rem; padding-left: 2rem; text-indent: -2rem; margin-bottom: 0.8rem;
     overflow-wrap: anywhere;
   }
   a { color: var(--blue); }
 
-  footer {
-    max-width: 62rem; margin: 0 auto; padding: 2rem 1.25rem 3rem;
+
+  /* ---------- Taekwondo details on every slide ---------- */
+  .content-slide { position: relative; }
+  .slide-mark {
+    position: absolute; right: 2vw; bottom: 1vw;
+    font-family: "Noto Sans KR", sans-serif; font-weight: 900;
+    font-size: clamp(6rem, 18vw, 15rem); line-height: 1;
+    color: var(--ink); opacity: 0.04;
+    pointer-events: none; user-select: none; white-space: nowrap;
+  }
+  .content-slide .slide-inner { position: relative; z-index: 1; }
+  .stripe { position: relative; }
+  .stripe .mini-knot {
+    position: absolute; left: 50%; top: -1.5rem; width: 3.4rem; height: auto;
+    transform: translateX(-50%) scale(0); transform-origin: center;
+    transition: transform 0.4s 1.05s cubic-bezier(.3,1.6,.5,1);
+  }
+  .content-slide.in .stripe .mini-knot { transform: translateX(-50%) scale(1); }
+  .tenet {
+    display: flex; align-items: baseline; gap: 0.6rem;
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
-    font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--rule);
+    font-size: 0.95rem; color: var(--muted); margin: 0 0 0.5rem;
+  }
+  .tenet span[lang="ko"] {
+    font-family: "Noto Sans KR", sans-serif; font-weight: 900;
+    font-size: 1.15rem; color: var(--red);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stripe .mini-knot { transform: translateX(-50%) scale(1); }
   }
 
-  @media (max-width: 640px) {
-    section { grid-template-columns: 0.4rem 1fr; gap: 0 1.1rem; padding: 2.25rem 0; }
-    header { padding-top: 3rem; }
+  /* ---------- Controls ---------- */
+  .controls {
+    position: absolute; right: 1.25rem; bottom: 1.25rem; z-index: 5;
+    display: flex; align-items: center; gap: 0.6rem;
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  }
+  .counter { font-size: 0.95rem; color: var(--muted); min-width: 3.5rem; text-align: center; }
+  .controls button {
+    width: 3rem; height: 3rem; border-radius: 50%;
+    border: 1.5px solid var(--ink); background: var(--dobok); color: var(--ink);
+    font-size: 1.25rem; cursor: pointer;
+    display: grid; place-items: center;
+    transition: background 0.2s, color 0.2s;
+  }
+  .controls button:hover:not(:disabled) { background: var(--ink); color: #fff; }
+  .controls button:disabled { opacity: 0.3; cursor: default; }
+  .progress { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--red); transition: width 0.7s cubic-bezier(.65,0,.25,1); }
+
+  /* ---------- Motion ---------- */
+  .taegeuk { animation: turn-in 1.4s cubic-bezier(.2,.7,.2,1) both; }
+  .knot { animation: rise 0.8s 0.9s ease-out both; }
+  .belt-bar span { animation: award 0.45s ease-out both; }
+  .belt-bar span:nth-child(1) { animation-delay: 0.3s; }
+  .belt-bar span:nth-child(2) { animation-delay: 0.45s; }
+  .belt-bar span:nth-child(3) { animation-delay: 0.6s; }
+  .belt-bar span:nth-child(4) { animation-delay: 0.75s; }
+  .belt-bar span:nth-child(5) { animation-delay: 0.9s; }
+  .belt-bar span:nth-child(6) { animation-delay: 1.05s; }
+  .watermark { animation: fade-wm 2s 0.2s ease-out both; }
+  @keyframes turn-in { from { transform: rotate(-270deg) scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes rise { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes award { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes fade-wm { from { opacity: 0; } to { opacity: 0.045; } }
+
+  /* On each slide: the belt stripe ties down, then the text arrives */
+  .content-slide .stripe { transform: scaleY(0); transition: transform 0.8s 0.35s cubic-bezier(.2,.7,.2,1); }
+  .content-slide .content { opacity: 0; transform: translateX(24px); transition: opacity 0.6s 0.6s, transform 0.6s 0.6s; }
+  .content-slide.in .stripe { transform: scaleY(1); }
+  .content-slide.in .content { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before { animation: none !important; transition: none !important; }
+    .content-slide .stripe, .content-slide .content { transform: none; opacity: 1; }
+  }
+
+  @media (max-width: 760px) {
+    .hero .slide-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .emblem { flex-direction: row; justify-content: flex-start; }
+    .taegeuk { max-width: 7rem; }
+    .knot { max-width: 9rem; }
+    .content-slide .slide-inner { grid-template-columns: 0.4rem 1fr; gap: 0 1.1rem; }
+    .slide-inner { padding-top: 2rem; }
+    .controls { right: 0.75rem; bottom: 0.75rem; }
+    .controls button { width: 2.6rem; height: 2.6rem; }
   }
 </style>
 </head>
 <body>
 
-<nav aria-label="Sections">
+<nav aria-label="Slides">
   <ol>
     <li><a href="#positioning"><span class="swatch white"></span>Positioning</a></li>
     <li><a href="#contribution"><span class="swatch" style="background:var(--belt-yellow)"></span>Contribution</a></li>
     <li><a href="#literature"><span class="swatch" style="background:var(--belt-green)"></span>Literature review</a></li>
     <li><a href="#framework"><span class="swatch" style="background:var(--belt-blue)"></span>Analytical framework</a></li>
     <li><a href="#ai"><span class="swatch" style="background:var(--belt-red)"></span>AI transparency</a></li>
-    <li><a href="#reflection"><span class="swatch" style="background:var(--belt-black)"></span>Reflection</a></li>
+    <li><a href="#reflection"><span class="swatch black" style="background:var(--belt-black)"></span>Reflection</a></li>
   </ol>
 </nav>
 
-<header>
-  <h1>Taekwondo and Belonging at Nazarbayev University</h1>
-  <div class="belt-knot" aria-hidden="true">
-    <span style="background:var(--belt-white)"></span>
-    <span style="background:var(--belt-yellow)"></span>
-    <span style="background:var(--belt-green)"></span>
-    <span style="background:var(--belt-blue)"></span>
-    <span style="background:var(--belt-red)"></span>
-    <span style="background:var(--belt-black)"></span>
+<div class="deck">
+  <div class="track">
+
+    <section class="slide hero" id="top" aria-label="Title">
+      <div class="watermark" aria-hidden="true">태권도</div>
+      <div class="slide-inner">
+        <div>
+          <p class="hangul" lang="ko">태권도</p>
+          <h1>Taekwondo and Belonging at Nazarbayev University</h1>
+          <div class="belt-bar" aria-hidden="true">
+            <span style="background:var(--belt-white)"></span>
+            <span style="background:var(--belt-yellow)"></span>
+            <span style="background:var(--belt-green)"></span>
+            <span style="background:var(--belt-blue)"></span>
+            <span style="background:var(--belt-red)"></span>
+            <span style="background:var(--belt-black)"></span>
+          </div>
+          <div class="rq">
+            <p>Research question</p>
+            <p>How do NU students who practice taekwondo experience a sense of belonging to NU student life in the 2026-2027 academic year?</p>
+          </div>
+        </div>
+        <div class="emblem" aria-hidden="true">
+          <svg class="taegeuk" viewBox="-104 -104 208 208">
+            <circle r="100" fill="#003478"/>
+            <path d="M-100,0 A100,100 0 0,1 100,0 A50,50 0 0,1 0,0 A50,50 0 0,0 -100,0 Z" fill="#C8102E"/>
+            <circle r="102" fill="none" stroke="#1C2230" stroke-width="2"/>
+          </svg>
+          <svg class="knot" viewBox="0 0 240 110">
+            <rect x="0" y="22" width="240" height="22" rx="3" fill="#1C2230"/>
+            <polygon points="104,40 122,40 96,104 74,100" fill="#1C2230"/>
+            <polygon points="118,40 136,40 166,100 144,104" fill="#1C2230"/>
+            <rect x="100" y="14" width="40" height="38" rx="5" fill="#1C2230" stroke="#F7F8FA" stroke-width="2.5"/>
+            <line x1="106" y1="24" x2="134" y2="42" stroke="#F7F8FA" stroke-width="2.5"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide" id="positioning" aria-label="Epistemological positioning">
+      <div class="slide-mark" aria-hidden="true" lang="ko">예의</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--belt-white); box-shadow: inset 0 0 0 1px #BFC4CC;"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--belt-white)" stroke="#9AA1AD" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--belt-white)" stroke="#9AA1AD" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--belt-white)" stroke="#9AA1AD" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#9AA1AD" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">예의</span>Courtesy</p>
+          <h2>Epistemological positioning</h2>
+          <p>Positioning: interpretivist. My question asks how NU students who practise taekwondo experience a sense of belonging, which means I am after personal meaning rather than measurable facts — exactly what interpretivism is for. Belonging is a subjective, socially constructed idea, so I can only understand it through students' own accounts of their lives at NU and in the club. And because the answer depends on this specific context — this university, this club, these students — my question calls for depth from a few participants rather than generalisation from many.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide" id="contribution" aria-label="Contribution">
+      <div class="slide-mark" aria-hidden="true" lang="ko">백절불굴</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--belt-yellow)"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--belt-yellow)" stroke="#B88A00" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--belt-yellow)" stroke="#B88A00" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--belt-yellow)" stroke="#B88A00" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#B88A00" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">백절불굴</span>Indomitable spirit</p>
+          <h2>Contribution</h2>
+          <p>What exists is that most of the research was done either in USA or South Korea. What's missing is no research about student-led taekwondo club at universities in Kazakhstan and at NU, with no drinking. What I add is the comparable data from my university taekwondo club with 100+ members with different views on that.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide" id="literature" aria-label="Literature review">
+      <div class="slide-mark" aria-hidden="true" lang="ko">인내</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--belt-green)"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--belt-green)" stroke="#1E5E3A" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--belt-green)" stroke="#1E5E3A" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--belt-green)" stroke="#1E5E3A" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#1E5E3A" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">인내</span>Perseverance</p>
+          <h2>Literature review</h2>
+          <p>Astin states that students that involve in activities have better chances of staying integrated in campus life, Moxey found that on the first place students actually are more engaged to their clubs and via it they deepen their ties with campus community. However, Astin found out that heavy athletic exposure of students may distance them from campus life. Real clash is that Astin states that their high exposure to trainings may distance them while Moxey states that club is a way to connect with campus life.</p>
+          <p>Kim et al. (2021) made meta analysis of 28 studies and most of them showed positive results regarding sociality and school life adjustments, including making new friends. Kim et al. (2014) has interviewed exactly 12 active taekwondo practitioners and found out that their friendships across different cultures have strengthened. The first measures with questionnaires; the second asks members about their experience.</p>
+          <p>However, Kim et al. (2021) was examining almost all Korean schoolchildren with concepts the authors admit were classified inconsistently across studies. Kim et al. (2014) studied commercial studios with Korean masters. Moxey studied only one UK university during COVID. There were no authors who made such research in Kazakhstan, and in a student-led taekwondo club.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide" id="framework" aria-label="Analytical framework">
+      <div class="slide-mark" aria-hidden="true" lang="ko">극기</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--belt-blue)"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--belt-blue)" stroke="#123A75" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--belt-blue)" stroke="#123A75" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--belt-blue)" stroke="#123A75" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#123A75" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">극기</span>Self-control</p>
+          <h2>Analytical framework</h2>
+          <h3>Sensitising concepts</h3>
+          <p>By belonging I state that your presence matters, you are a member, and you share something with others, it may be pain during trainings or achievements during tournaments, or getting a new belt with your friends. Similar belts as well as dobok is what binds. My concept is shared physical hardship during taekwondo trainings.</p>
+          <h3>Expectations</h3>
+          <p>Old members describe belonging as shared tournaments, shared harsh trainings, while new members describe belonging as eating together after training, celebrating each other's birthdays, and being happy for each other's achievements in taekwondo.</p>
+          <h3>Positionality</h3>
+          <p>I am a new member of the club with previous 9 years of experience. This gives me some background about taekwondo. Access to new people who are also related to taekwondo. But it also connects taekwondo with campus life at NU. I already know what taekwondo may give you. Some members may be concerned that I already have an experience in it. So I will ask people who have just started taekwondo at university club or who have also just joined the club.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide" id="ai" aria-label="AI transparency statement">
+      <div class="slide-mark" aria-hidden="true" lang="ko">염치</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--belt-red)"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--belt-red)" stroke="#7E0A1D" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--belt-red)" stroke="#7E0A1D" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--belt-red)" stroke="#7E0A1D" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#7E0A1D" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">염치</span>Integrity</p>
+          <h2>AI transparency statement</h2>
+          <p>AI helped me to narrow down my Research Question, and assisted in changing my positivist question into interpretivist. Helped me evaluate my sources and highlighted some tensions between authors that even I did not see. It gave me valid feedback throughout my presentation building.</p>
+          <p>I chose the topic myself. I found all 6 sources on my own via NU library and checked for their pdf version availability. Every section of the research presentation was written by me. My curiosity came out of a real taekwondo club at NU. While I was searching for sources in our NU library, I wanted to make an experiment and ask AI to find me relevant sources to find out whether AI provided sources will actually suit or even be real time works, but it resulted in false data.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide" id="reflection" aria-label="Reflection">
+      <div class="slide-mark" aria-hidden="true" lang="ko">도</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--belt-black)"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--belt-black)" stroke="#1C2230" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--belt-black)" stroke="#1C2230" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--belt-black)" stroke="#1C2230" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#F7F8FA" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">도</span>Do, the way</p>
+          <h2>What working with AI helped me understand, and what I still don't understand about my research design</h2>
+          <h3>What AI helped me understand</h3>
+          <p>Working with AI helped me understand that it might point out some information that I might have overlooked. It gave me the feeling of a real person who is able to give me push backs and real feedback during conversation.</p>
+          <h3>What I still don't understand</h3>
+          <p>How many people will I interview, will the belt ranking differ results, how I will compare the results.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide content-slide references" id="references" aria-label="References">
+      <div class="slide-mark" aria-hidden="true" lang="ko">감사합니다</div>
+      <div class="slide-inner">
+        <div class="stripe" style="background:var(--rule)"><svg class="mini-knot" viewBox="0 0 60 44" aria-hidden="true"><polygon points="24,22 30,22 20,42 13,40" fill="var(--rule)" stroke="#9AA1AD" stroke-width="1.5"/><polygon points="30,22 36,22 47,40 40,42" fill="var(--rule)" stroke="#9AA1AD" stroke-width="1.5"/><rect x="18" y="4" width="24" height="22" rx="3" fill="var(--rule)" stroke="#9AA1AD" stroke-width="1.5"/><line x1="22" y1="9" x2="38" y2="21" stroke="#9AA1AD" stroke-width="1.5"/></svg></div>
+        <div class="content">
+          <p class="tenet"><span lang="ko">감사합니다</span>Thank you</p>
+          <h2>References</h2>
+          <p>Astin, A. W. (1999). Student involvement: A developmental theory for higher education. <em>Journal of College Student Development, 40</em>(5), 518–529.</p>
+          <p>Kim, J., Heo, J., King, C., &amp; Kim, S. (2014). Cultural understanding and personal growth through Taekwondo as cross-cultural activity. <em>Journal of Humanistic Psychology, 54</em>(3), 356–376. <a href="https://doi.org/10.1177/0022167813504826">https://doi.org/10.1177/0022167813504826</a></p>
+          <p>Kim, Y.-J., Baek, S.-H., Park, J.-B., Choi, S.-H., Lee, J.-D., &amp; Nam, S.-S. (2021). The psychosocial effects of Taekwondo training: A meta-analysis. <em>International Journal of Environmental Research and Public Health, 18</em>(21), Article 11427. <a href="https://doi.org/10.3390/ijerph182111427">https://doi.org/10.3390/ijerph182111427</a></p>
+          <p>McMillan, D. W., &amp; Chavis, D. M. (1986). Sense of community: A definition and theory. <em>Journal of Community Psychology, 14</em>(1), 6–23. <a href="https://doi.org/10.1002/1520-6629(198601)14:1%3C6::AID-JCOP2290140103%3E3.0.CO;2-I">https://doi.org/10.1002/1520-6629(198601)14:1&lt;6::AID-JCOP2290140103&gt;3.0.CO;2-I</a></p>
+          <p>Moxey, M., Brown, H., &amp; Parry, K. (2022). University sports clubs: Culture, belonging and adapting to change during COVID-19. <em>Journal of Educational Innovation, Partnership and Change, 8</em>(1).</p>
+          <p>Schwartz-Shea, P., &amp; Yanow, D. (2012). <em>Interpretive research design: Concepts and processes.</em> Routledge.</p>
+          <p style="margin-top:2rem; text-indent:0; padding-left:0; color:var(--muted); font-size:0.9rem;">PLS210 Political Science Research Methods, Fall 2026. Presentation #1.</p>
+        </div>
+      </div>
+    </section>
+
   </div>
-  <div class="rq">
-    <p>Research question</p>
-    <p>How do NU students who practice taekwondo experience a sense of belonging to NU student life in the 2026-2027 academic year?</p>
+
+  <div class="controls">
+    <button type="button" id="prev" aria-label="Previous slide">←</button>
+    <span class="counter" id="counter" aria-live="polite">1 / 8</span>
+    <button type="button" id="next" aria-label="Next slide">→</button>
   </div>
-</header>
+  <div class="progress" id="progress"></div>
+</div>
 
-<main>
+<script>
+  const track = document.querySelector('.track');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const navLinks = Array.from(document.querySelectorAll('nav a'));
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
 
-  <section id="positioning">
-    <div class="stripe" style="background:var(--belt-white); box-shadow: inset 0 0 0 1px #BFC4CC;"></div>
-    <div>
-      <h2>Epistemological positioning</h2>
-      <p>Positioning: interpretivist. My question asks how NU students who practise taekwondo experience a sense of belonging, which means I am after personal meaning rather than measurable facts — exactly what interpretivism is for. Belonging is a subjective, socially constructed idea, so I can only understand it through students' own accounts of their lives at NU and in the club. And because the answer depends on this specific context — this university, this club, these students — my question calls for depth from a few participants rather than generalisation from many.</p>
-    </div>
-  </section>
+  // Stop the browser from scrolling the deck itself when a #link is opened
+  const deck = document.querySelector('.deck');
+  deck.addEventListener('scroll', () => { if (deck.scrollLeft !== 0) deck.scrollLeft = 0; });
+  window.addEventListener('load', () => { deck.scrollLeft = 0; });
 
-  <section id="contribution">
-    <div class="stripe" style="background:var(--belt-yellow)"></div>
-    <div>
-      <h2>Contribution</h2>
-      <p>What exists is that most of the research was done either in USA or South Korea. What's missing is no research about student-led taekwondo club at universities in Kazakhstan and at NU, with no drinking. What I add is the comparable data from my university taekwondo club with 100+ members with different views on that.</p>
-    </div>
-  </section>
+  function go(i) {
+    current = Math.max(0, Math.min(i, slides.length - 1));
+    track.style.transform = 'translateX(' + (-100 * current) + '%)';
+    slides.forEach((s, n) => {
+      s.classList.toggle('in', n === current);
+      s.setAttribute('aria-hidden', n === current ? 'false' : 'true');
+      s.inert = n !== current;
+    });
+    slides[current].scrollTop = 0;
+    deck.scrollLeft = 0;
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + slides[current].id));
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+    progress.style.width = ((current + 1) / slides.length * 100) + '%';
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === slides.length - 1;
+    history.replaceState(null, '', '#' + slides[current].id);
+  }
 
-  <section id="literature">
-    <div class="stripe" style="background:var(--belt-green)"></div>
-    <div>
-      <h2>Literature review</h2>
-      <p>Astin states that students that involve in activities have better chances of staying integrated in campus life, Moxey found that on the first place students actually are more engaged to their clubs and via it they deepen their ties with campus community. However, Astin found out that heavy athletic exposure of students may distance them from campus life. Real clash is that Astin states that their high exposure to trainings may distance them while Moxey states that club is a way to connect with campus life.</p>
-      <p>Kim et al. (2021) made meta analysis of 28 studies and most of them showed positive results regarding sociality and school life adjustments, including making new friends. Kim et al. (2014) has interviewed exactly 12 active taekwondo practitioners and found out that their friendships across different cultures have strengthened. The first measures with questionnaires; the second asks members about their experience.</p>
-      <p>However, Kim et al. (2021) was examining almost all Korean schoolchildren with concepts the authors admit were classified inconsistently across studies. Kim et al. (2014) studied commercial studios with Korean masters. Moxey studied only one UK university during COVID. There were no authors who made such research in Kazakhstan, and in a student-led taekwondo club.</p>
-    </div>
-  </section>
+  prevBtn.addEventListener('click', () => go(current - 1));
+  nextBtn.addEventListener('click', () => go(current + 1));
 
-  <section id="framework">
-    <div class="stripe" style="background:var(--belt-blue)"></div>
-    <div>
-      <h2>Analytical framework</h2>
-      <h3>Sensitising concepts</h3>
-      <p>By belonging I state that your presence matters, you are a member, and you share something with others, it may be pain during trainings or achievements during tournaments, or getting a new belt with your friends. Similar belts as well as dobok is what binds. My concept is shared physical hardship during taekwondo trainings.</p>
-      <h3>Expectations</h3>
-      <p>Old members describe belonging as shared tournaments, shared harsh trainings, while new members describe belonging as eating together after training, celebrating each other's birthdays, and being happy for each other's achievements in taekwondo.</p>
-      <h3>Positionality</h3>
-      <p>I am a new member of the club with previous 9 years of experience. This gives me some background about taekwondo. Access to new people who are also related to taekwondo. But it also connects taekwondo with campus life at NU. I already know what taekwondo may give you. Some members may be concerned that I already have an experience in it. So I will ask people who have just started taekwondo at university club or who have also just joined the club.</p>
-    </div>
-  </section>
+  navLinks.forEach(a => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const idx = slides.findIndex(s => '#' + s.id === a.getAttribute('href'));
+    if (idx >= 0) go(idx);
+  }));
 
-  <section id="ai">
-    <div class="stripe" style="background:var(--belt-red)"></div>
-    <div>
-      <h2>AI transparency statement</h2>
-      <p>AI helped me to narrow down my Research Question, and assisted in changing my positivist question into interpretivist. Helped me evaluate my sources and highlighted some tensions between authors that even I did not see. It gave me valid feedback throughout my presentation building.</p>
-      <p>I chose the topic myself. I found all 6 sources on my own via NU library and checked for their pdf version availability. Every section of the research presentation was written by me. My curiosity came out of a real taekwondo club at NU. While I was searching for sources in our NU library, I wanted to make an experiment and ask AI to find me relevant sources to find out whether AI provided sources will actually suit or even be real time works, but it resulted in false data.</p>
-    </div>
-  </section>
+  // Keyboard and presentation clickers
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(current + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(current - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+  });
 
-  <section id="reflection">
-    <div class="stripe" style="background:var(--belt-black)"></div>
-    <div>
-      <h2>What working with AI helped me understand, and what I still don't understand about my research design</h2>
-      <h3>What AI helped me understand</h3>
-      <p>Working with AI helped me understand that it might point out some information that I might have overlooked. It gave me the feeling of a real person who is able to give me push backs and real feedback during conversation.</p>
-      <h3>What I still don't understand</h3>
-      <p>How many people will I interview, will the belt ranking differ results, how I will compare the results.</p>
-    </div>
-  </section>
+  // Swipe on phones and tablets
+  let startX = null, startY = null;
+  document.querySelector('.deck').addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+  }, { passive: true });
+  document.querySelector('.deck').addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(current + (dx < 0 ? 1 : -1));
+    startX = null;
+  });
 
-  <section class="references" id="references">
-    <div class="stripe" style="background:var(--rule)"></div>
-    <div>
-      <h2>References</h2>
-      <p>Astin, A. W. (1999). Student involvement: A developmental theory for higher education. <em>Journal of College Student Development, 40</em>(5), 518–529.</p>
-      <p>Kim, J., Heo, J., King, C., &amp; Kim, S. (2014). Cultural understanding and personal growth through Taekwondo as cross-cultural activity. <em>Journal of Humanistic Psychology, 54</em>(3), 356–376. <a href="https://doi.org/10.1177/0022167813504826">https://doi.org/10.1177/0022167813504826</a></p>
-      <p>Kim, Y.-J., Baek, S.-H., Park, J.-B., Choi, S.-H., Lee, J.-D., &amp; Nam, S.-S. (2021). The psychosocial effects of Taekwondo training: A meta-analysis. <em>International Journal of Environmental Research and Public Health, 18</em>(21), Article 11427. <a href="https://doi.org/10.3390/ijerph182111427">https://doi.org/10.3390/ijerph182111427</a></p>
-      <p>McMillan, D. W., &amp; Chavis, D. M. (1986). Sense of community: A definition and theory. <em>Journal of Community Psychology, 14</em>(1), 6–23. <a href="https://doi.org/10.1002/1520-6629(198601)14:1%3C6::AID-JCOP2290140103%3E3.0.CO;2-I">https://doi.org/10.1002/1520-6629(198601)14:1&lt;6::AID-JCOP2290140103&gt;3.0.CO;2-I</a></p>
-      <p>Moxey, M., Brown, H., &amp; Parry, K. (2022). University sports clubs: Culture, belonging and adapting to change during COVID-19. <em>Journal of Educational Innovation, Partnership and Change, 8</em>(1).</p>
-      <p>Schwartz-Shea, P., &amp; Yanow, D. (2012). <em>Interpretive research design: Concepts and processes.</em> Routledge.</p>
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  PLS210 Political Science Research Methods, Fall 2026. Presentation #1.
-</footer>
-
+  // Open on the slide in the link, if there is one
+  const start = slides.findIndex(s => '#' + s.id === location.hash);
+  go(start >= 0 ? start : 0);
+</script>
 </body>
 </html>
